@@ -4,6 +4,35 @@ A **production-quality Flutter application** demonstrating Clean Architecture, B
 
 ---
 
+## 📱 Screenshots
+
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/screeshots/1.jpeg" width="220" alt="Login Screen"/>
+      <br/><b>Login Screen</b>
+    </td>
+    <td align="center">
+      <img src="assets/screeshots/2.jpeg" width="220" alt="Employee Dashboard"/>
+      <br/><b>Employee Dashboard</b>
+    </td>
+    <td align="center">
+      <img src="assets/screeshots/3.jpeg" width="220" alt="Employee Details"/>
+      <br/><b>Employee Details</b>
+    </td>
+    <td align="center">
+      <img src="assets/screeshots/4.jpeg" width="220" alt="Profile Screen"/>
+      <br/><b>Profile Screen</b>
+    </td>
+  </tr>
+</table>
+
+</div>
+
+---
+
 ## 🏗️ Architecture Overview
 
 This project strictly follows **Clean Architecture** with unidirectional dependency flow:
@@ -36,7 +65,7 @@ lib/
 │   ├── auth/
 │   │   ├── domain/   # User entity, AuthRepository, UseCases
 │   │   ├── data/     # UserModel, FirebaseAuthDatasource, AuthRepositoryImpl
-│   │   └── presentation/ # AuthBloc + LoginScreen
+│   │   └── presentation/ # AuthBloc + LoginScreen + ProfileScreen
 │   └── employees/
 │       ├── domain/   # Employee entity, EmployeeRepository, UseCases
 │       ├── data/     # EmployeeModel, FirebaseEmployeeDatasource, EmployeeRepositoryImpl
@@ -45,31 +74,34 @@ lib/
 ```
 
 ---
-̌
+
 ## ✨ Features
 
 - 🔐 **Google Sign-In** (Firebase Auth)
+- 🔄 **Persistent Session** — already logged-in users skip directly to dashboard
 - 👥 **Employee Directory** fetched from Firestore
-- 🌟 **Loyal Employee Flagging**: green border, badge, star icon for employees with ≥5 years AND active status
+- 🌟 **Loyal Employee Flagging** — green highlight for employees with ≥5 years AND active status
+- 👤 **Profile Screen** — shows Google account info + logout
+- 🚪 **Logout Confirmation** — confirmation dialog before signing out
 - 🌙 **Light & Dark Mode** with Material 3
 - ⚡ **Shimmer loading** skeletons
 - 🔄 **Pull-to-refresh**
 - 🎭 **Hero animations** on profile images
-- 📄 **Employee Detail** screen
+- 📊 **Stats Dashboard** — Total / Active / Loyal counts
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Concern           | Technology                  |
-|-------------------|-----------------------------|
-| State Management  | `flutter_bloc`              |
-| Dependency Injection | `get_it`                 |
-| Routing           | `go_router`                 |
-| Serialization     | `json_serializable`         |
-| Auth              | Firebase Auth + Google Sign-In v7 |
-| Database          | Firebase Firestore           |
-| UI                | Material 3                  |
+| Concern              | Technology                        |
+|----------------------|-----------------------------------|
+| State Management     | `flutter_bloc`                    |
+| Dependency Injection | `get_it`                          |
+| Routing              | `go_router`                       |
+| Serialization        | `json_serializable`               |
+| Auth                 | Firebase Auth + Google Sign-In v7 |
+| Database             | Firebase Firestore                |
+| UI                   | Material 3                        |
 
 ---
 
@@ -108,13 +140,31 @@ import 'firebase_options.dart';
 await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 ```
 
-### 4. Run Code Generators
+### 4. Register SHA-1 Fingerprint (Android)
+
+Google Sign-In on Android requires your debug SHA-1 to be registered in Firebase:
+
+```sh
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+```
+
+Add the `SHA1` value in Firebase Console → Project Settings → Your Android App → Add Fingerprint.
+
+### 5. Run Code Generators
 
 ```sh
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-### 5. Run the App
+### 6. Seed Firestore with Sample Data
+
+Temporarily add to `main()`:
+```dart
+import 'seeder.dart';
+await seedDatabase(); // run once, then remove
+```
+
+### 7. Run the App
 
 ```sh
 flutter run
@@ -148,18 +198,6 @@ flutter run
 
 ---
 
-## 🌱 Sample Data Seeder
-
-A seeder script is available at `lib/seeder.dart`. It adds 10 employees with a mix of:
-- ≥5 years + active (`isLoyalEmployee = true`, flagged green)
-- ≥5 years + inactive
-- <5 years + active
-- <5 years + inactive
-
-To use the seeder, call `seedDatabase()` from `main()` once after Firebase initialization, then remove it.
-
----
-
 ## 🏆 Business Rule: Loyal Employee
 
 ```dart
@@ -176,9 +214,12 @@ When `isLoyalEmployee == true`, the employee card shows:
 
 ## 📱 Screens
 
-1. **Login Screen** — Clean Google Sign-In UI
-2. **Employee List Screen** — Cards with shimmer loader, pull-to-refresh
-3. **Employee Detail Screen** — Full profile with hero animation
+| Screen | Description |
+|---|---|
+| **Login** | Gradient UI with animated Google Sign-In button |
+| **Dashboard** | Gradient header with user avatar, greeting, stats row, employee list |
+| **Employee Detail** | Full profile — green gradient for loyal employees |
+| **Profile** | Google account info, last login, sign-out with confirmation |
 
 ---
 
